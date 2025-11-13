@@ -1,0 +1,6 @@
+// TODO - add function throw error that turns on debug mode and prints error + dump in log file
+// TODO - make different number of args
+
+// TODO - ask about deleting elements
+
+// TODO - make debug library
