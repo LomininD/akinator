@@ -37,7 +37,7 @@ int main()
     node node_5 = {str_6, NULL, NULL};
     node root_node = {str_7, &node_5, &node_20};
 
-    tree ref_tree = {&root_node, 7, debug_mode, ok};
+    tree ref_tree = {NULL, 0, debug_mode, ok};
 
     print_tree_dump(&ref_tree);
 
@@ -46,12 +46,21 @@ int main()
 
     while (!end)
     {
-    bool guessed = false;
-    node* current_node = ref_tree.root;
+        if (ref_tree.size == 0)
+        {
+            printf_both(debug_mode, "-> Hm... It seems that there is no data, where can it be?\n");
+            printf_both(debug_mode, "-> Lets create and set up data base now.\n");
+            err_t requested_beginning = request_tree_beginning(&ref_tree);
+            if (requested_beginning != ok)
+                return 0;
+        }
+
+        bool guessed = false;
+        node* current_node = ref_tree.root;
 
         while(!guessed)
         {
-            printf_both(debug_mode, "%s? ([y]es / [n]o)\n", current_node->string);
+            printf_both(debug_mode, "-> %s? ([y]es / [n]o)\n", current_node->string);
 
             ans = get_answer(debug_mode);
 
@@ -63,33 +72,32 @@ int main()
 
             if (current_node->yes_branch == NULL)   
             {
-                printf_both(debug_mode, "This is %s, am I right? ([y]es / [n]o)\n", current_node->string);
+                printf_both(debug_mode, "-> This is %s, am I right? ([y]es / [n]o)\n", current_node->string);
                 ans = get_answer(debug_mode);
                 if (ans == yes)
                 {
-                    printf_both(debug_mode, "Yeah, I am always right.\n");
+                    printf_both(debug_mode, "-> Yeah, I am always right.\n");
                 }
                 else
                 {
                     //printf_both(debug_mode, "What is it?\n");
                     err_t requested = request_new_nodes(&ref_tree, current_node);
                     if (requested != ok)
-                        break;
+                        return 0;
                 }
                 guessed = true;
             }
         }
 
-        print_tree_dump(&ref_tree);
+        //print_tree_dump(&ref_tree);
 
-        printf_both(debug_mode, MAKE_BOLD("Would you like to try again? ([y]es / [n]o)\n"));
+        printf_both(debug_mode, "-> Would you like to try again? ([y]es / [n]o)\n");
 
         ans = get_answer(debug_mode);
 
         if (ans == no)
             end = true;
     }
-
 
     print_tree_dump(&ref_tree);
     destroy_tree(&ref_tree);

@@ -5,7 +5,7 @@
 
 
 static node* create_node(md_t debug_mode);
-static void destroy_node(node* node);
+static void destroy_node(node* node, md_t debug_mode);
 
 
 static char* request_string(md_t debug_mode);
@@ -43,12 +43,12 @@ ans_t get_answer(md_t debug_mode)
 
         if (scanned != 1)
         {
-            printf_both(debug_mode, "Could not read the answer, please try again:\n");
+            printf_both(debug_mode, "-> Could not read the answer, please try again:\n");
             clearerr(stdin);
             continue;
         }
 
-        printf_log_msg(debug_mode, "get_answer: got %c\n", ans);
+        printf_log_msg(debug_mode, "get_answer: got \"%c\"\n", ans);
 
         if (ans == 'y')
         {
@@ -62,7 +62,7 @@ ans_t get_answer(md_t debug_mode)
         }
         else
         {
-            printf_both(debug_mode, "Could not recognize the answer, please try again:\n");
+            printf_both(debug_mode, "-> Could not recognize the answer, please try again:\n");
             clear_buffer();
             continue;
         }
@@ -71,7 +71,7 @@ ans_t get_answer(md_t debug_mode)
     return yes;
 }
 
-// FIXME - should ask again if got only '\n' 
+// FIXME - should ask again if got only '\n' remove excess spaces
 char* request_string(md_t debug_mode) 
 {
     char* string = (char*) calloc(100, sizeof(string));
@@ -88,20 +88,62 @@ char* request_string(md_t debug_mode)
     
     while (read <= 0)
     {
-        printf_both(debug_mode, "Could not recognize the answer, please try again\n");
+        printf_both(debug_mode, "-> Could not recognize the answer, please try again\n");
         clearerr(stdin);
         read = getline(&string, &string_len, stdin); // clear_buffer()?
     }
 
     *strrchr(string, '\n') = '\0';
 
-    printf_log_msg(debug_mode, "request_string: got %s\n", string);
+    printf_log_msg(debug_mode, "request_string: got \"%s\"\n", string);
 
     return string;
 }
 
-// if no nodes, split function, hm it seems that there is no data, where can it be?
-// lets create and set up data base now
+
+err_t request_tree_beginning(tree* tree)
+{
+    VERIFY_TREE(error);
+
+    md_t debug_mode = tree->debug_mode;
+
+    printf_log_msg(debug_mode, "request_new_node: began requesting tree beginning\n");
+
+    printf_both(debug_mode, "-> Enter first object name, please:\n");
+    char* first_obj_name = request_string(debug_mode);
+    if (first_obj_name == NULL)
+        return error;
+    
+    printf_both(debug_mode, "-> Enter second object name, please:\n");
+    char* second_obj_name = request_string(debug_mode);
+    if (second_obj_name == NULL)
+        return error;
+
+    node* yes_node  = create_node(debug_mode);
+    node* no_node = create_node(debug_mode);
+
+    yes_node->string  = first_obj_name;
+    no_node->string = second_obj_name;
+
+    printf_both(debug_mode, "-> How does %s differ from %s?\n", first_obj_name, second_obj_name);
+    char* diff_str = request_string(debug_mode);
+    
+    node* root_node = create_node(debug_mode);
+    root_node->string = diff_str;
+    root_node->yes_branch = yes_node;
+    root_node->no_branch = no_node;
+
+    tree->root = root_node;
+    tree->size = 3;
+    
+    VERIFY_TREE(error);
+
+    printf_log_msg(debug_mode, "request_new_node: tree beginning requested\n");
+
+    DISPLAY_TREE();
+
+    return ok;
+}
 
 
 err_t request_new_nodes(tree* tree, node* parent_node)
@@ -112,14 +154,14 @@ err_t request_new_nodes(tree* tree, node* parent_node)
 
     printf_log_msg(debug_mode, "request_new_node: began requesting new nodes\n");
 
-    printf_both(debug_mode, "What is it?\n");
+    printf_both(debug_mode, "-> What is it?\n");
 
     char* obj_name  = request_string(debug_mode);
 
     if (obj_name == NULL)
         return error;
 
-    printf_both(debug_mode, "How does it differ form %s?\n", parent_node->string);
+    printf_both(debug_mode, "-> How does it differ form %s?\n", parent_node->string);
 
     char* diff_string  = request_string(debug_mode);
 
@@ -140,6 +182,8 @@ err_t request_new_nodes(tree* tree, node* parent_node)
     VERIFY_TREE(error);
     
     printf_log_msg(debug_mode, "request_new_node: new nodes are requested\n");
+
+    DISPLAY_TREE()
     return ok;
 }
 
@@ -166,7 +210,7 @@ void destroy_tree(tree* tree)
 
     printf_log_msg(debug_mode, "destroy_tree: began cutting down tree\n");
 
-    destroy_node(tree->root);
+    destroy_node(tree->root, debug_mode);
 
     tree->root = NULL;
 
@@ -175,18 +219,18 @@ void destroy_tree(tree* tree)
 
 
 // change!!!
-void destroy_node(node* node)
+void destroy_node(node* node, md_t debug_mode)
 {
     assert(node != NULL);
-    printf("deleting %p\n", node);
+    printf_log_msg(debug_mode, "deleting %p\n", node);
 
     if (node->yes_branch != NULL)
     {
-        destroy_node(node->yes_branch);
+        destroy_node(node->yes_branch, debug_mode);
     }
     if (node->no_branch)
     {
-        destroy_node(node->no_branch);
+        destroy_node(node->no_branch, debug_mode);
     }
 
     free(node->string);
@@ -246,5 +290,5 @@ static void clear_buffer(void)
 {
     int c = '\0';
     while ((c = getchar()) != '\n' && c != EOF);
-    printf("clear_buffer: cleared\n");
+    //printf("clear_buffer: cleared\n");
 }
