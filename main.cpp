@@ -91,16 +91,9 @@ int main()
             end = true;
     }
 
-    //print_tree_dump(&ref_tree);
 
-    free(str_1);
-    free(str_2);
-    free(str_3);
-    free(str_4);
-    free(str_5);
-    free(str_6);
-    free(str_7);
-
+    print_tree_dump(&ref_tree);
+    destroy_tree(&ref_tree);
     fclose(log_ptr);
     return 0;
 }

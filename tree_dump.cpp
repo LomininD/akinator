@@ -192,36 +192,33 @@ void fill_preamble(FILE* fp)
 }
 
 
+#define PRINT_PTR(PTR) fprintf(fp, "<FONT face = \"mono\" color=\"#%x\"> %p </FONT>", hash((long long int) PTR), PTR)
+#define BEGIN_ROW fprintf(fp, "<TR>")
+#define END_ROW fprintf(fp, "</TR>")
+
 const node* list_nodes(FILE* fp, const node* current_node)
 {
     assert(fp != NULL);
     assert(current_node != NULL);
 
-    printf("listing node %p\n", current_node);
+    //printf("listing node %p\n", current_node);
 
     fprintf(fp, "NODE_%p [label = <", current_node);
     fprintf(fp, "<TABLE BORDER=\"0\" CELLBORDER=\"1\">");
 
-    fprintf(fp, "<TR>");
-    fprintf(fp, "<TD COLSPAN=\"2\">");
-    fprintf(fp, "ptr =<FONT color=\"#%x\"> %p </FONT>", hash((long long int) current_node), current_node);
-    fprintf(fp, "</TD>");
-    fprintf(fp, "</TR>");
+    BEGIN_ROW;
+    fprintf(fp, "<TD COLSPAN=\"2\">"); fprintf(fp, "ptr ="); PRINT_PTR(current_node); fprintf(fp, "</TD>");
+    END_ROW;
 
-    fprintf(fp, "<TR>");
-    fprintf(fp, "<TD COLSPAN=\"2\">");
-    fprintf(fp, "%s", current_node->string);
-    fprintf(fp, "</TD>");
-    fprintf(fp, "</TR>");
+    BEGIN_ROW;
+    fprintf(fp, "<TD COLSPAN=\"2\">"); fprintf(fp, "%s", current_node->string); fprintf(fp, "</TD>");
+    END_ROW;
 
-    fprintf(fp, "<TR>");
-    fprintf(fp, "<TD PORT=\"f0\">");
-    fprintf(fp, "yes [<FONT color=\"#%x\"> %p </FONT>]", hash((long long int) current_node->yes_branch), current_node->yes_branch);
-    fprintf(fp, "</TD>");
-    fprintf(fp, "<TD PORT=\"f1\">");
-    fprintf(fp, "no [<FONT color=\"#%x\"> %p </FONT>]", hash((long long int) current_node->no_branch), current_node->no_branch);
-    fprintf(fp, "</TD>");
-    fprintf(fp, "</TR>");
+    BEGIN_ROW;
+    fprintf(fp, "<TD PORT=\"f0\">"); fprintf(fp, "yes ["); PRINT_PTR(current_node->yes_branch); fprintf(fp, "] </TD>");
+    fprintf(fp, "<TD PORT=\"f1\">"); fprintf(fp, "no [");  PRINT_PTR(current_node->no_branch);  fprintf(fp, "] </TD>");
+    END_ROW;
+
     fprintf(fp, "</TABLE>>, shape = plain, style = filled, " \
                 "fillcolor = \"#C0C0C0\", fontcolor = \"black\"]\n");
         
@@ -240,6 +237,9 @@ const node* list_nodes(FILE* fp, const node* current_node)
     return current_node;    
 }
 
+#undef PRINT_PTR
+#undef BEGIN_ROW
+#undef END_ROW
 
 int hash(long long int ptr)
 {

@@ -5,10 +5,12 @@
 
 
 static node* create_node(md_t debug_mode);
-static err_t delete_node(tree* tree, node* node);
+static void destroy_node(node* node);
+
 
 static char* request_string(md_t debug_mode);
 static void clear_buffer(void);
+
 
 
 void initialize_tree_log(md_t debug_mode)
@@ -107,6 +109,9 @@ char* request_string(md_t debug_mode)
     return string;
 }
 
+// if no nodes, split function, hm it seems that there is no data, where can it be?
+// lets create and set up data base now
+
 
 err_t request_new_nodes(tree* tree, node* parent_node)
 {
@@ -154,8 +159,51 @@ node* create_node(md_t debug_mode)
 
     node* new_node = (node*) calloc(1, sizeof(node));
 
+    new_node->freshly_created = true;
+
     printf_log_msg(debug_mode, "create_node: done creating node [%p]\n", new_node);
     return new_node;
+}
+
+
+
+void destroy_tree(tree* tree)
+{
+    assert(tree != NULL);
+
+    md_t debug_mode = tree->debug_mode;
+
+    printf_log_msg(debug_mode, "destroy_tree: began cutting down tree\n");
+
+    destroy_node(tree->root);
+
+    tree->root = NULL;
+
+    printf_log_msg(debug_mode, "destroy_tree: finished cutting down tree\n");
+}
+
+
+// change!!!
+void destroy_node(node* node)
+{
+    assert(node != NULL);
+    printf("deleting %p\n", node);
+
+    if (node->yes_branch != NULL)
+    {
+        destroy_node(node->yes_branch);
+    }
+    if (node->no_branch)
+    {
+        destroy_node(node->no_branch);
+    }
+
+    free(node->string);
+
+    if (node->freshly_created)
+    {
+        free(node);
+    }
 }
 
 

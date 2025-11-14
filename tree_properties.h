@@ -12,6 +12,7 @@ struct node
     char* string;
     node* yes_branch;
     node* no_branch;
+    bool freshly_created;
 };
 
 struct tree
