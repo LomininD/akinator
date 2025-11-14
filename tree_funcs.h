@@ -17,7 +17,6 @@ enum ans_t
     yes
 };
 
-void initialize_tree_log(md_t debug_mode);
 err_t tree_ctor(tree* tree, md_t debug_mode);
 ans_t get_answer(md_t debug_mode);
 err_t request_new_nodes(tree* tree, node* parent_node);

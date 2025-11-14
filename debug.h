@@ -23,6 +23,8 @@ enum md_t
     on
 };
 
+void initialize_log(md_t debug_mode, const char* file_name, const char* log_title);
+
 #define printf_both(mode, ...) do{              \
     printf(__VA_ARGS__);                        \
     if (mode == on)                             \

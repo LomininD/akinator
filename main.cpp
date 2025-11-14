@@ -8,7 +8,7 @@
 int main()
 {
     md_t debug_mode = on;
-    initialize_tree_log(debug_mode);
+    initialize_log(debug_mode, "akinator_log.html", "AKINATOR_LOG");
     
     // sample tree structure
 

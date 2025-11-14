@@ -20,16 +20,16 @@ err_t verify_tree(const tree* tree)
     }
 
     md_t debug_mode = tree->debug_mode;
-
     int error_count = 0;
-    node_count = 0;
-    err_t nodes_ok = verify_node(tree->root, debug_mode, tree->size);
 
     if (tree->err_stat != ok)
     {
         printf_err(debug_mode, "[from verify_tree] -> err_stat is not ok\n");
         error_count++;
     }
+
+    node_count = 0;
+    err_t nodes_ok = verify_node(tree->root, debug_mode, tree->size);
 
     if (nodes_ok != ok)
     {
@@ -67,11 +67,11 @@ err_t verify_node(const node* node, md_t debug_mode, size_t max_size)
         return error;
     }
 
-    // if ()
-    // {
-    //     printf_err(debug_mode, "[from verify_node] -> node [%p] string not found\n", node);
-    //     return error;
-    // }
+    if (node->string == NULL)
+    {
+        printf_err(debug_mode, "[from verify_node] -> node [%p] string not found\n", node);
+        return error;
+    }
 
     if (verify_node(node->yes_branch,  debug_mode, max_size) == ok && \
         verify_node(node->no_branch, debug_mode, max_size) == ok)

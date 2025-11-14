@@ -12,15 +12,6 @@ static char* request_string(md_t debug_mode);
 static void clear_buffer(void);
 
 
-
-void initialize_tree_log(md_t debug_mode)
-{
-    log_ptr = fopen("akinator_log.html", "w");
-    printf_log_only(debug_mode, "<pre>\n");
-    printf_log_only(debug_mode, "<h3> +++ AKINATOR LOG +++ </h3>\n");
-}
-
-
 err_t tree_ctor(tree* tree, md_t debug_mode)
 {
     if (tree == NULL)
