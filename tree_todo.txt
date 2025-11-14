@@ -4,3 +4,6 @@
 // TODO - ask about deleting elements
 
 // TODO - make debug library
+
+
+If we want to check pointer we can add special signature in the first space and check it 

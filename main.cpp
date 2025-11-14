@@ -46,7 +46,6 @@ int main()
 
     while (!end)
     {
-
     bool guessed = false;
     node* current_node = ref_tree.root;
 

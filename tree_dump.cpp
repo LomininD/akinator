@@ -126,6 +126,7 @@ void print_tree_dump(const tree* tree)
     generate_dump_image(tree);
 }
 
+#define FPRINT(...) fprintf(fp, __VA_ARGS__)
 
 // generates tree graph and puts in html log file
 void generate_dump_image(const tree* tree)
@@ -144,20 +145,20 @@ void generate_dump_image(const tree* tree)
 
     FILE* fp = fopen(code_file_name, "w");
 
-    fprintf(fp, "digraph G\n");
-    fprintf(fp, "{\n");
+    FPRINT("digraph G\n");
+    FPRINT("{\n");
 
     fill_preamble(fp);
 
-    fprintf(fp, "{\n");
-    fprintf(fp, "edge[color = \"#45503B\", penwidth = 1]\n");
+    FPRINT("{\n");
+    FPRINT("edge[color = \"#45503B\", penwidth = 1]\n");
 
     if (tree->root != NULL)
          list_nodes(fp, tree->root);
 
-    fprintf(fp, "}\n\n");
+    FPRINT("}\n\n");
 
-    fprintf(fp, "}\n");
+    FPRINT("}\n");
 
     fclose(fp);
     image_count++;
@@ -186,15 +187,15 @@ void fill_preamble(FILE* fp)
 {
     assert(fp != NULL);
 
-    // fprintf(fp, "rankdir = LR;\n");
-    fprintf(fp, "bgcolor = \"white\"\n");
-    fprintf(fp, "node[shape = doubleoctagon, style = \"filled\", fillcolor = \"red\", fontcolor = \"white\"]\n");
+    // FPRINT("rankdir = LR;\n");
+    FPRINT("bgcolor = \"white\"\n");
+    FPRINT("node[shape = doubleoctagon, style = \"filled\", fillcolor = \"red\", fontcolor = \"white\"]\n");
 }
 
 
-#define PRINT_PTR(PTR) fprintf(fp, "<FONT face = \"mono\" color=\"#%x\"> %p </FONT>", hash((long long int) PTR), PTR)
-#define BEGIN_ROW fprintf(fp, "<TR>")
-#define END_ROW fprintf(fp, "</TR>")
+#define PRINT_PTR(PTR) FPRINT("<FONT face = \"monospace\" color=\"#%x\"> %p </FONT>", hash((long long int) PTR), PTR)
+#define BEGIN_ROW FPRINT("<TR>")
+#define END_ROW FPRINT("</TR>")
 
 const node* list_nodes(FILE* fp, const node* current_node)
 {
@@ -203,40 +204,40 @@ const node* list_nodes(FILE* fp, const node* current_node)
 
     //printf("listing node %p\n", current_node);
 
-    fprintf(fp, "NODE_%p [label = <", current_node);
-    fprintf(fp, "<TABLE BORDER=\"0\" CELLBORDER=\"1\">");
+    FPRINT("NODE_%p [label = <", current_node);
+    FPRINT("<TABLE BORDER=\"0\" CELLBORDER=\"1\">");
 
     BEGIN_ROW;
-    fprintf(fp, "<TD COLSPAN=\"2\">"); fprintf(fp, "ptr ="); PRINT_PTR(current_node); fprintf(fp, "</TD>");
+    FPRINT("<TD COLSPAN=\"2\">"); FPRINT("ptr ="); PRINT_PTR(current_node); FPRINT("</TD>");
     END_ROW;
 
     BEGIN_ROW;
-    fprintf(fp, "<TD COLSPAN=\"2\">"); fprintf(fp, "%s", current_node->string); fprintf(fp, "</TD>");
+    FPRINT("<TD COLSPAN=\"2\">"); FPRINT("%s", current_node->string); FPRINT("</TD>");
     END_ROW;
 
     BEGIN_ROW;
-    fprintf(fp, "<TD PORT=\"f0\">"); fprintf(fp, "yes ["); PRINT_PTR(current_node->yes_branch); fprintf(fp, "] </TD>");
-    fprintf(fp, "<TD PORT=\"f1\">"); fprintf(fp, "no [");  PRINT_PTR(current_node->no_branch);  fprintf(fp, "] </TD>");
+    FPRINT("<TD PORT=\"f0\">"); FPRINT("yes ["); PRINT_PTR(current_node->yes_branch); FPRINT("] </TD>");
+    FPRINT("<TD PORT=\"f1\">"); FPRINT("no [");  PRINT_PTR(current_node->no_branch);  FPRINT("] </TD>");
     END_ROW;
 
-    fprintf(fp, "</TABLE>>, shape = plain, style = filled, " \
-                "fillcolor = \"#C0C0C0\", fontcolor = \"black\"]\n");
+    FPRINT("</TABLE>>, shape = plain, style = filled, fillcolor = \"#C0C0C0\", fontcolor = \"black\"]\n");
         
     if (current_node->yes_branch != NULL)
     {
         const node* next_node = list_nodes(fp, current_node->yes_branch);
-        fprintf(fp, "NODE_%p:f0 -> NODE_%p\n", current_node, next_node);
+        FPRINT("NODE_%p:f0 -> NODE_%p\n", current_node, next_node);
     }
 
     if (current_node->no_branch != NULL)
     {
         const node* next_node = list_nodes(fp, current_node->no_branch);
-        fprintf(fp, "NODE_%p:f1 -> NODE_%p\n", current_node, next_node);
+        FPRINT("NODE_%p:f1 -> NODE_%p\n", current_node, next_node);
     }
 
     return current_node;    
 }
 
+#undef FPRINT
 #undef PRINT_PTR
 #undef BEGIN_ROW
 #undef END_ROW
