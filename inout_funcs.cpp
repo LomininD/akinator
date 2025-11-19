@@ -6,6 +6,46 @@ static void clear_buffer(void);
 static bool check_buffer();
 
 
+cmd_t get_cmd(md_t debug_mode)
+{
+    char ans = 0;
+    bool got_ans = false;
+    int scanned = 0;
+
+    while(!got_ans)
+    {
+        scanned = scanf("%c", &ans);
+
+        if (scanned != 1 || !check_buffer())
+        {
+            printf_both(debug_mode, "-> Could not read the answer, please try again:\n");
+            clear_buffer();
+            clearerr(stdin);
+            continue;
+        }
+
+        printf_log_msg(debug_mode, "get_answer: got \"%c\"\n", ans);
+
+        switch (ans)
+        {
+            case 'g': 
+                return guess;
+            case 's':
+                return save;
+            case 'l':
+                return load;
+            case 'q':
+                return quit;
+            default:
+                printf_both(debug_mode, "-> Could not recognize the answer, please try again:\n");
+                continue;
+        };
+    }
+
+    return unknown;
+}
+
+
 ans_t get_answer(md_t debug_mode)
 {
     char ans = 0;
@@ -26,25 +66,19 @@ ans_t get_answer(md_t debug_mode)
 
         printf_log_msg(debug_mode, "get_answer: got \"%c\"\n", ans);
 
-        if (ans == 'y')
+        switch (ans)
         {
-            //clear_buffer();
-            return yes;
-        }
-        else if (ans == 'n')
-        {
-            //clear_buffer();
-            return no;
-        }
-        else
-        {
-            printf_both(debug_mode, "-> Could not recognize the answer, please try again:\n");
-            //clear_buffer();
-            continue;
-        }
+            case 'y':
+                return yes;
+            case 'n':
+                return no;
+            default:
+                printf_both(debug_mode, "-> Could not recognize the answer, please try again:\n");
+                continue;
+        };
     }
 
-    return yes;
+    return no_ans;
 }
 
 

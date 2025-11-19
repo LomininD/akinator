@@ -8,13 +8,17 @@ enum cmd_t
     guess,
     save,
     load,
-    quit
+    quit,
+
+    unknown
 };
 
 enum ans_t
 {
     no,
-    yes
+    yes,
+
+    no_ans
 };
 
 cmd_t get_cmd(md_t debug_mode);

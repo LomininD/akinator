@@ -42,63 +42,30 @@ int main()
 
     print_tree_dump(&ref_tree, "Beginning tree view\n");
 
+    cmd_t current_cmd = unknown;
     bool end = false;
-    ans_t ans = yes;
 
-    while (!end)
+    do
     {
-        if (ref_tree.size == 0)
+        current_cmd = request_cmd(&ref_tree);
+        switch (current_cmd)
         {
-            printf_both(debug_mode, "-> Hm... It seems that there is no data, where can it be?\n");
-            printf_both(debug_mode, "-> Lets create and set up data base now.\n");
-            err_t requested_beginning = request_tree_beginning(&ref_tree);
-            if (requested_beginning != ok)
-                return 0;
-        }
-
-        bool guessed = false;
-        node* current_node = ref_tree.root;
-
-        while(!guessed)
-        {
-            printf_both(debug_mode, "-> %s? ([y]es / [n]o)\n", current_node->string);
-
-            ans = get_answer(debug_mode);
-
-            if (ans == yes)
-                current_node = current_node->yes_branch;
-            else 
-                current_node = current_node->no_branch;
-            
-
-            if (current_node->yes_branch == NULL)   
-            {
-                printf_both(debug_mode, "-> This is %s, am I right? ([y]es / [n]o)\n", current_node->string);
-                ans = get_answer(debug_mode);
-                if (ans == yes)
-                {
-                    printf_both(debug_mode, "-> Yeah, I am always right.\n");
-                }
-                else
-                {
-                    //printf_both(debug_mode, "What is it?\n");
-                    err_t requested = request_new_nodes(&ref_tree, current_node);
-                    if (requested != ok)
-                        return 0;
-                }
-                guessed = true;
-            }
-        }
-
-        //print_tree_dump(&ref_tree);
-
-        printf_both(debug_mode, "-> Would you like to try again? ([y]es / [n]o)\n");
-
-        ans = get_answer(debug_mode);
-
-        if (ans == no)
-            end = true;
+            case guess:
+                process_guessing(&ref_tree);
+                break;
+            case load:
+                break;
+            case save:
+                break;
+            case quit:
+                end = true;
+                break;
+            default:
+                printf_err(debug_mode, "[from main] -> could not recognize the command\n");
+                break;
+        };
     }
+    while (!end);
 
     print_tree_dump(&ref_tree, "Finish tree view\n");
     destroy_tree(&ref_tree);

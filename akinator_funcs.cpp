@@ -1,17 +1,98 @@
-#include <stdio.h>
 #include "akinator_funcs.h"
 
 
-void request_cmd(tree* tree)
+static err_t check_prediction(tree* tree, node* current_node);
+
+
+cmd_t request_cmd(const tree* tree)
 {
+    VERIFY_TREE(unknown);
+    
     md_t debug_mode = tree->debug_mode;
 
+    printf_log_msg(debug_mode, "\n");
     printf_log_msg(debug_mode, "request_cmd: began requesting command\n");
-    printf_both(debug_mode, "-> Choose a command to execute");
-    printf_both(debug_mode, "-> [g]uess object, [s]ave base, [l]oad base, [q]uit");
 
-    
+    printf_both(debug_mode, "-> Choose a command to execute\n");
+    printf_both(debug_mode, "-> [g]uess object, [s]ave base, [l]oad base, [q]uit\n");
+
+    cmd_t current_cmd = get_cmd(debug_mode);
+
+    printf_log_msg(debug_mode, "request_cmd: finished requesting command\n\n");
+
+    return current_cmd;
 }
+
+
+err_t process_guessing(tree* tree)
+{
+    VERIFY_TREE(error); // FIXME - copy pasting
+
+    md_t debug_mode = tree->debug_mode;
+
+    printf_log_msg(debug_mode, "guess_object: began guessing object\n");
+    
+    if (tree->size == 0)
+    {
+        err_t requested_beginning = request_tree_beginning(tree);
+        if (requested_beginning != ok) return requested_beginning;
+    }
+
+    ans_t ans = no_ans;
+    bool guessed = false;
+    node* current_node = tree->root;
+
+    while(!guessed)
+    {
+        printf_both(debug_mode, "-> %s? ([y]es / [n]o)\n", current_node->string);
+
+        ans = get_answer(debug_mode);
+
+        if (ans == yes) current_node = current_node->yes_branch;
+        else            current_node = current_node->no_branch;
+
+        if (current_node->yes_branch == NULL)   
+        {
+            err_t checked = check_prediction(tree, current_node);
+            if (checked != ok) return checked;
+            guessed = true;
+        }
+    }
+
+    VERIFY_TREE(error);
+
+    printf_log_msg(debug_mode, "guess_object: finished guessing object\n");
+
+    return ok;
+}
+
+
+err_t check_prediction(tree* tree, node* current_node)
+{
+    VERIFY_TREE(error);
+
+    md_t debug_mode = tree->debug_mode;
+
+    printf_log_msg(debug_mode, "check_prediction: began checking guessed object\n");
+
+    printf_both(debug_mode, "-> This is %s, am I right? ([y]es / [n]o)\n", current_node->string);
+    ans_t ans = get_answer(debug_mode);
+    err_t requested = ok; // FIXME - not supposed to be here
+
+    switch (ans)
+    {
+        case yes:
+            printf_both(debug_mode, "-> Yeah, I am always right.\n");
+            return ok;
+        case no:
+            requested = request_new_nodes(tree, current_node);
+            if (requested != ok) return requested;
+            return ok;
+        default:
+            return error;
+    };
+}
+
 
 err_t request_tree_beginning(tree* tree)
 {
@@ -21,21 +102,22 @@ err_t request_tree_beginning(tree* tree)
 
     printf_log_msg(debug_mode, "request_new_node: began requesting tree beginning\n");
 
-    printf_both(debug_mode, "-> Enter first object name, please:\n");
+    printf_both(debug_mode, "-> Hm... It seems that there is no data, where can it be?\n");
+    printf_both(debug_mode, "-> Lets create and set up data base now.\n");
+
+    printf_both(debug_mode, "-> Enter first object name, please:\n"); // FIXME - copy pasting
     char* first_obj_name = request_string(debug_mode);
-    if (first_obj_name == NULL)
-        return error;
+    if (first_obj_name == NULL) return error;
     
     printf_both(debug_mode, "-> Enter second object name, please:\n");
     char* second_obj_name = request_string(debug_mode);
-    if (second_obj_name == NULL)
-        return error;
+    if (second_obj_name == NULL) return error;
 
-    node* yes_node  = create_node(debug_mode);
-    node* no_node = create_node(debug_mode);
+    node* yes_node = create_node(debug_mode);
+    node* no_node  = create_node(debug_mode);
 
-    yes_node->string  = first_obj_name;
-    no_node->string = second_obj_name;
+    yes_node->string = first_obj_name;
+    no_node->string  = second_obj_name;
 
     printf_both(debug_mode, "-> How does %s differ from %s?\n", first_obj_name, second_obj_name);
     char* diff_str = request_string(debug_mode);

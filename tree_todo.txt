@@ -1,6 +1,5 @@
-// TODO - add function throw error that turns on debug mode and prints error + dump in log file
 
-// TODO - ask about deleting elements
+
 // TODO - time-delayed printf
 
 

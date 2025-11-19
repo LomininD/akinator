@@ -55,6 +55,7 @@ void destroy_tree(tree* tree)
 }
 
 
+// change when read from file added !!!
 void destroy_node(node* node, md_t debug_mode)
 {
     assert(node != NULL);

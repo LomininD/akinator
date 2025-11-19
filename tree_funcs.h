@@ -20,31 +20,17 @@ err_t print_node(const node* node, tree_view print_type, md_t debug_mode);
 
 
 #ifdef TREE_VERIFICATION
-#define VERIFY_TREE(RET) do{                    \
-    if (process_tree_verification(tree) != ok)  \
-        return RET;                             \
-}                                               \
-while(0)
+
+#define VERIFY_TREE(RET) if (process_tree_verification(tree) != ok)  return RET;
 
 #else
 
-# define VERIFY_TREE(RET) do{                   \
-    if (tree == NULL)                           \
-        return RET;                             \
-}                                               \
-while(0);
+# define VERIFY_TREE(RET) if (tree == NULL) return RET;
 
 #endif
 
-#define DISPLAY_TREE() {                \
-    if (debug_mode == on)               \
-        generate_dump_image(tree);      \
-}
+#define DISPLAY_TREE() if (debug_mode == on) generate_dump_image(tree);
 
-#define print_data_if(COND, ...) do{                        \
-    if (print_type == COND)                                 \
-        printf_both(debug_mode, __VA_ARGS__);               \
-}                                                           \
-while(0)
+#define print_data_if(COND, ...) if (print_type == COND) printf_both(debug_mode, __VA_ARGS__);
 
 #endif
