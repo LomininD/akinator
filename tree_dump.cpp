@@ -131,6 +131,8 @@ void print_tree_dump(const tree* tree, const char* format, ...)
     printf_log_bold(debug_mode, "=========================================================\n\n", NULL);
 
     generate_dump_image(tree);
+
+    va_end(ap);
 }
 
 #define FPRINT(...) fprintf(fp, __VA_ARGS__)

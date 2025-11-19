@@ -3,6 +3,7 @@
 #include "inout_funcs.h"
 
 static void clear_buffer(void);
+static bool check_buffer();
 
 
 ans_t get_answer(md_t debug_mode)
@@ -15,9 +16,10 @@ ans_t get_answer(md_t debug_mode)
     {
         scanned = scanf("%c", &ans);
 
-        if (scanned != 1)
+        if (scanned != 1 || !check_buffer())
         {
             printf_both(debug_mode, "-> Could not read the answer, please try again:\n");
+            clear_buffer();
             clearerr(stdin);
             continue;
         }
@@ -26,17 +28,18 @@ ans_t get_answer(md_t debug_mode)
 
         if (ans == 'y')
         {
-            clear_buffer();
+            //clear_buffer();
             return yes;
         }
         else if (ans == 'n')
         {
-            clear_buffer();
+            //clear_buffer();
             return no;
         }
         else
         {
             printf_both(debug_mode, "-> Could not recognize the answer, please try again:\n");
+            //clear_buffer();
             continue;
         }
     }
@@ -79,4 +82,13 @@ static void clear_buffer(void)
     int c = '\0';
     while ((c = getchar()) != '\n' && c != EOF);
     //printf("clear_buffer: cleared\n");
+}
+
+static bool check_buffer()
+{
+    int c = 0;
+    while ((c = getchar()) != EOF && c != '\n')
+        if (c != ' ' && c != '\n' && c != '\t')
+            return false;
+    return true;
 }
