@@ -3,6 +3,7 @@
 
 #include "debug.h"
 
+#define SAVE_FILE_NAME "database_save.txt"
 #define TREE_VERIFICATION
 
 struct node

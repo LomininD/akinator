@@ -48,14 +48,16 @@ int main()
     do
     {
         current_cmd = request_cmd(&ref_tree);
+        err_t executed = ok;
         switch (current_cmd)
         {
             case guess:
-                process_guessing(&ref_tree);
+                executed = process_guessing(&ref_tree);
                 break;
             case load:
                 break;
             case save:
+                save_database(&ref_tree);
                 break;
             case quit:
                 end = true;
@@ -64,6 +66,8 @@ int main()
                 printf_err(debug_mode, "[from main] -> could not recognize the command\n");
                 break;
         };
+
+        if (executed != ok) break; // TODO: add abortion scenario
     }
     while (!end);
 

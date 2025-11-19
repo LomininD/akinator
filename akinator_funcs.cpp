@@ -2,6 +2,7 @@
 
 
 static err_t check_prediction(tree* tree, node* current_node);
+static void write_node(FILE* save_ptr, const tree* tree, const node* current_node);
 
 
 cmd_t request_cmd(const tree* tree)
@@ -65,6 +66,60 @@ err_t process_guessing(tree* tree)
 
     return ok;
 }
+
+
+err_t save_database(const tree* tree)
+{
+    VERIFY_TREE(error);
+
+    md_t debug_mode = tree->debug_mode;
+
+    printf_log_msg(debug_mode, "save_data_base: began saving database\n");
+
+    printf_both(debug_mode, "-> Saving current version of database may overwrite previous saved version of database\n");
+    printf_both(debug_mode, "-> Save anyway? ([y]es / [n]o)\n");
+
+    ans_t ans = get_answer(debug_mode);
+    FILE* save_ptr = NULL;
+
+    switch (ans)
+    {
+        case yes:
+            printf_log_msg(debug_mode, "\n");
+            printf_log_msg(debug_mode, "save_database: started writing in file\n");
+            save_ptr = fopen(SAVE_FILE_NAME, "w");
+            write_node(save_ptr, tree, tree->root);
+            fclose(save_ptr);
+            printf_log_msg(debug_mode, "save_database: done writing in file\n\n");
+            printf_both(debug_mode, "-> Database saved successfully\n");
+            break;
+        case no:
+            break;
+        default:
+            return error;
+    };
+
+    printf_log_msg(debug_mode, "save_data_base: database saved\n");
+
+    return ok;
+}
+
+#define FPRINT(...) fprintf(save_ptr, __VA_ARGS__)
+
+void write_node(FILE* save_ptr, const tree* tree, const node* current_node)
+{
+    printf_log_msg(tree->debug_mode, "writing [%p]\n", current_node);
+
+    if (current_node == NULL) { FPRINT("nil "); return; }
+    
+    FPRINT("( ");
+    FPRINT("\"%s\" ", current_node->string);
+    write_node(save_ptr, tree, current_node->yes_branch);
+    write_node(save_ptr, tree, current_node->no_branch);
+    FPRINT(") ");
+}
+
+#undef FPRINT
 
 
 err_t check_prediction(tree* tree, node* current_node)
