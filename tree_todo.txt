@@ -1,9 +1,7 @@
 // TODO - add function throw error that turns on debug mode and prints error + dump in log file
-// TODO - make different number of args
 
 // TODO - ask about deleting elements
-
-// TODO - make debug library
+// TODO - time-delayed printf
 
 
 If we want to check pointer we can add special signature in the first space and check it 

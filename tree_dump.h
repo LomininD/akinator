@@ -6,7 +6,7 @@
 const size_t file_name_size = 64;
 const size_t sys_str_size = 200;
 
-void print_tree_dump(const tree* tree);
+void print_tree_dump(const tree* tree, const char* format, ...);
 void generate_dump_image(const tree* tree);
 
 err_t verify_tree(const tree* tree);

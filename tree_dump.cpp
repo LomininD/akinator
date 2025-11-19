@@ -1,7 +1,8 @@
-#include "tree_dump.h"
-#include "tree_funcs.h"
 #include <stdio.h>
 #include <assert.h>
+#include <stdarg.h>
+#include "tree_dump.h"
+#include "tree_funcs.h"
 
 size_t node_count = 0;
 
@@ -97,7 +98,7 @@ err_t process_tree_verification(const tree* tree)
             break;
         case error:
             printf_err(tree->debug_mode, "verification failed\n"); 
-            print_tree_dump(tree);
+            print_tree_dump(tree, "Verification failed\n");
             return error;
             break;
         case ok:
@@ -108,15 +109,21 @@ err_t process_tree_verification(const tree* tree)
 }
 
 
-void print_tree_dump(const tree* tree)
+void print_tree_dump(const tree* tree, const char* format, ...)
 {
     assert(tree != NULL);
+
+    va_list ap;
+    va_start(ap, format);
 
     md_t debug_mode = tree->debug_mode;
 
     printf_log_bold(debug_mode, "======================= TREE DUMP =======================\n\n", NULL);
 
-    printf_log_bold(debug_mode, "tree [%p]\n\n", tree);
+    vprintf(format, ap);
+    vfprintf(log_ptr, format, ap);
+
+    printf_log_bold(debug_mode, "\ntree [%p]\n\n", tree);
     printf_log_msg(debug_mode, "\terr_stat   =  %d (0 - no_error, 1 - error)\n", tree->err_stat);
     printf_log_msg(debug_mode, "\tdebug_mode =  %d (0 - off, 1 - on)\n", tree->debug_mode);
     printf_log_msg(debug_mode, "\tsize       =  %zu\n\n", tree->size);

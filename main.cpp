@@ -40,7 +40,7 @@ int main()
 
     tree ref_tree = {&root_node, 7, debug_mode, ok};
 
-    print_tree_dump(&ref_tree);
+    print_tree_dump(&ref_tree, "Beginning tree view\n");
 
     bool end = false;
     ans_t ans = yes;
@@ -100,7 +100,7 @@ int main()
             end = true;
     }
 
-    print_tree_dump(&ref_tree);
+    print_tree_dump(&ref_tree, "Finish tree view\n");
     destroy_tree(&ref_tree);
     fclose(log_ptr);
     return 0;
