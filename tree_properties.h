@@ -5,8 +5,6 @@
 
 #define TREE_VERIFICATION
 
-
-
 struct node
 {
     char* string;

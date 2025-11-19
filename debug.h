@@ -6,6 +6,7 @@
 # define DEBUG_H
 
 #include <stdio.h>
+#include <unistd.h>
 #include "font_styles.h"
 
 extern FILE* log_ptr;

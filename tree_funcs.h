@@ -11,16 +11,8 @@ enum tree_view
     inorder
 };
 
-enum ans_t
-{
-    no,
-    yes
-};
-
+node* create_node(md_t debug_mode);
 err_t tree_ctor(tree* tree, md_t debug_mode);
-ans_t get_answer(md_t debug_mode);
-err_t request_tree_beginning(tree* tree);
-err_t request_new_nodes(tree* tree, node* parent_node);
 void destroy_tree(tree* tree);
 
 err_t print_tree(const tree* tree, const node* root, tree_view print_type);

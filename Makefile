@@ -1,4 +1,5 @@
 CPP = g++
+
 CPPFLAGS = -g0 -D _DEBUG -ggdb3 -std=c++17 -O0 -Wall -Wextra -Weffc++ -Wc++14-compat                          \
 -Wmissing-declarations -Wcast-align -Wcast-qual -Wchar-subscripts -Wconversion -Wctor-dtor-privacy            \
 -Wempty-body -Wfloat-equal -Wformat-nonliteral -Wformat-security -Wformat=2 -Winline -Wnon-virtual-dtor 	  \
@@ -11,7 +12,7 @@ CPPFLAGS = -g0 -D _DEBUG -ggdb3 -std=c++17 -O0 -Wall -Wextra -Weffc++ -Wc++14-co
 
 BUILD = build
 
-SRCMODULES = tree_funcs.cpp debug.cpp tree_dump.cpp
+SRCMODULES = tree_funcs.cpp akinator_funcs.cpp inout_funcs.cpp debug.cpp tree_dump.cpp
 OBJMODULES = $(SRCMODULES:.cpp=.o)
 
 $(BUILD)/akinator: main.cpp $(addprefix $(BUILD)/,$(OBJMODULES))

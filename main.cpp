@@ -1,9 +1,10 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "tree_properties.h"
 #include "tree_funcs.h"
 #include "tree_dump.h"
-#include <stdlib.h>
-#include <string.h>
+#include "akinator_funcs.h"
 
 int main()
 {
@@ -29,15 +30,15 @@ int main()
     str_7 = strdup("Animal");
 
     
-    node node_6 = {str_1, NULL, NULL};
-    node node_16 = {str_2, NULL, NULL};
-    node node_15 = {str_3, NULL, NULL};
-    node node_3 = {str_4, &node_6, &node_16};
-    node node_20 = {str_5, &node_15, &node_3};
-    node node_5 = {str_6, NULL, NULL};
-    node root_node = {str_7, &node_5, &node_20};
+    node node_6 = {str_1, NULL, NULL, false};
+    node node_16 = {str_2, NULL, NULL, false};
+    node node_15 = {str_3, NULL, NULL, false};
+    node node_3 = {str_4, &node_6, &node_16, false};
+    node node_20 = {str_5, &node_15, &node_3, false};
+    node node_5 = {str_6, NULL, NULL, false};
+    node root_node = {str_7, &node_5, &node_20, false};
 
-    tree ref_tree = {NULL, 0, debug_mode, ok};
+    tree ref_tree = {&root_node, 7, debug_mode, ok};
 
     print_tree_dump(&ref_tree);
 
