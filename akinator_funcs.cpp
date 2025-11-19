@@ -1,9 +1,15 @@
+#include <sys/stat.h>
+#include <stdlib.h>
+#include <string.h>
 #include "akinator_funcs.h"
 
 
 static err_t check_prediction(tree* tree, node* current_node);
 static void write_node(FILE* save_ptr, const tree* tree, const node* current_node);
-
+static err_t process_saving(const tree* tree);
+static err_t process_loading(tree* tree);
+static node* read_node(char** current_pos, md_t debug_mode, size_t* node_count);
+static void skip_spaces(char** current_pos);
 
 cmd_t request_cmd(const tree* tree)
 {
@@ -36,7 +42,7 @@ err_t process_guessing(tree* tree)
     if (tree->size == 0)
     {
         err_t requested_beginning = request_tree_beginning(tree);
-        if (requested_beginning != ok) return requested_beginning;
+        return requested_beginning;
     }
 
     ans_t ans = no_ans;
@@ -74,24 +80,19 @@ err_t save_database(const tree* tree)
 
     md_t debug_mode = tree->debug_mode;
 
-    printf_log_msg(debug_mode, "save_data_base: began saving database\n");
+    printf_log_msg(debug_mode, "save_database: began saving database\n");
 
-    printf_both(debug_mode, "-> Saving current version of database may overwrite previous saved version of database\n");
+    printf_both(debug_mode, "-> Saving current version of database will overwrite saved version of database.\n");
     printf_both(debug_mode, "-> Save anyway? ([y]es / [n]o)\n");
 
     ans_t ans = get_answer(debug_mode);
-    FILE* save_ptr = NULL;
+    err_t saved = ok; // FIXME - how to remove
 
     switch (ans)
     {
         case yes:
-            printf_log_msg(debug_mode, "\n");
-            printf_log_msg(debug_mode, "save_database: started writing in file\n");
-            save_ptr = fopen(SAVE_FILE_NAME, "w");
-            write_node(save_ptr, tree, tree->root);
-            fclose(save_ptr);
-            printf_log_msg(debug_mode, "save_database: done writing in file\n\n");
-            printf_both(debug_mode, "-> Database saved successfully\n");
+            saved = process_saving(tree);
+            if (saved != ok) return saved;
             break;
         case no:
             break;
@@ -99,8 +100,25 @@ err_t save_database(const tree* tree)
             return error;
     };
 
-    printf_log_msg(debug_mode, "save_data_base: database saved\n");
+    printf_log_msg(debug_mode, "save_database: finished process\n");
 
+    return ok;
+}
+
+
+err_t process_saving(const tree* tree)
+{
+    md_t debug_mode = tree->debug_mode;
+
+    printf_log_msg(debug_mode, "\n");
+    printf_log_msg(debug_mode, "save_database: started writing in file\n");
+
+    FILE* save_ptr = fopen(SAVE_FILE_NAME, "w");
+    write_node(save_ptr, tree, tree->root);
+    fclose(save_ptr);
+    printf_both(debug_mode, "-> Database saved successfully\n");
+
+    printf_log_msg(debug_mode, "save_database: done writing in file\n\n");
     return ok;
 }
 
@@ -120,6 +138,177 @@ void write_node(FILE* save_ptr, const tree* tree, const node* current_node)
 }
 
 #undef FPRINT
+
+
+err_t load_database(tree* tree)
+{
+    VERIFY_TREE(error);
+
+    md_t debug_mode = tree->debug_mode;
+
+    printf_log_msg(debug_mode, "load_database: process began\n");
+
+    printf_both(debug_mode, "-> Loading saved version of database will overwrite current version of database.\n");
+    printf_both(debug_mode, "-> Load anyway? ([y]es / [n]o)\n");
+
+    ans_t ans = get_answer(debug_mode);
+
+    switch (ans)
+    {
+        case yes:
+            process_loading(tree);
+            break;
+        case no:
+            break;
+        default:
+            return error;
+    };
+
+    VERIFY_TREE(error);
+
+    print_tree_dump(tree, "Displaying freshly read tree", NULL);
+    printf_log_msg(debug_mode, "load_database: process finished\n");
+    return ok;
+}
+
+
+err_t process_loading(tree* tree)
+{
+    md_t debug_mode = tree->debug_mode;
+
+    printf_log_msg(debug_mode, "process_loading: process started\n");
+
+    FILE* load_ptr = fopen(SAVE_FILE_NAME, "r");
+    
+    if (load_ptr == NULL)
+    {
+        printf_both(debug_mode, "-> Could not find the database save file.");
+        printf_both(debug_mode, "-> It seems that database has not been saved before.");
+        return ok;
+    }
+
+    struct stat file_info = {};
+    fstat(fileno(load_ptr), &file_info);
+    long long bytes_in_file = file_info.st_size / sizeof(char);
+
+    char* text_buf = (char*) calloc (bytes_in_file + 1, sizeof(char));
+
+    if (text_buf == NULL) 
+    {
+        printf_err(debug_mode, "[from process_loading] -> not enough memory for file data\n");
+        return error;
+    }
+
+    size_t bytes_read = fread(text_buf, sizeof(char), bytes_in_file, load_ptr);
+    *(text_buf + bytes_in_file) = '\0';
+
+    tree->text_buf = text_buf;
+
+    printf_log_msg(debug_mode, "process_loading: bytes in file: %zu\n", bytes_in_file);
+    printf_log_msg(debug_mode, "process_loading: bytes read:    %zu\n", bytes_read);
+
+    size_t node_count = 0;
+
+    node* root_node = read_node(&text_buf, debug_mode, &node_count);
+    tree->root = root_node;
+    tree->size = node_count;
+
+    //free(text_buf);
+    printf_log_msg(debug_mode, "process_loading: process finished\n");
+
+    return ok;
+}
+
+
+node* read_node(char** current_pos, md_t debug_mode, size_t* node_count)
+{
+    skip_spaces(current_pos);
+    if (**current_pos == '(')
+    {
+        printf_log_msg(debug_mode, "read_node: got '(', began reading node\n");
+        puts(*current_pos);
+
+        node* new_node = create_node(debug_mode);
+        if (new_node == NULL) return NULL;
+        new_node->freshly_created = false;
+        (*node_count)++;
+
+        (*current_pos)++;
+        skip_spaces(current_pos);
+
+        printf_log_msg(debug_mode, "read_node: started reading node name\n");
+        puts(*current_pos);
+
+        int name_len = 0;
+        sscanf(*current_pos, "\"%*[^\"]\"%n", &name_len);
+
+        printf_log_msg(debug_mode, "read_node: done reading node name\n");
+        puts(*current_pos);
+
+        *strchr(*current_pos + 1, '"') = '\0';
+        new_node->string = *current_pos + 1;
+
+        *current_pos += name_len;
+
+        printf_log_msg(debug_mode, "read_node: node name assigned\n");
+        puts(*current_pos);
+
+        skip_spaces(current_pos);
+
+        printf_log_msg(debug_mode, "read_node: began reading left subtree\n");
+        puts(*current_pos);
+
+        node* left_node = read_node(current_pos, debug_mode, node_count);
+        new_node->yes_branch = left_node;
+
+        skip_spaces(current_pos);
+
+        printf_log_msg(debug_mode, "read_node: began reading right subtree\n");
+        puts(*current_pos);
+
+        node* right_node = read_node(current_pos, debug_mode, node_count);
+        new_node->no_branch = right_node;
+
+        skip_spaces(current_pos);
+
+        if (**current_pos != ')')
+        {
+            printf_err(debug_mode, "[from read_node] -> corrupted save file (no ')')\n");
+            destroy_node(new_node, debug_mode);
+            return NULL;
+        }
+
+        (*current_pos)++;
+
+        printf_log_msg(debug_mode, "read_node: node is read\n");
+        puts(*current_pos);
+        
+        return new_node;
+    }
+    else if (**current_pos == 'n' && *(*current_pos + 1) == 'i' && *(*current_pos + 2) == 'l')
+    {
+        *current_pos += 3;
+
+        printf_log_msg(debug_mode, "read_node: got nil\n");
+        puts(*current_pos);
+
+        return NULL;
+    }
+    else
+    {
+        printf_err(debug_mode, "[from read_node] -> corrupted save file (no '(' or nil)\n");
+        return NULL;
+    }
+}
+
+
+void skip_spaces(char** current_pos)
+{
+    while (**current_pos == ' ')
+    {
+        (*current_pos)++;
+    }
+}
 
 
 err_t check_prediction(tree* tree, node* current_node)

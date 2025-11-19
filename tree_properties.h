@@ -20,7 +20,8 @@ struct tree
     size_t size;
     md_t debug_mode;
     err_t err_stat;
-    bool saved;
+    //bool saved;
+    char* text_buf;
 };
 
 #endif

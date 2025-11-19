@@ -4,9 +4,6 @@
 #include <string.h>
 
 
-static void destroy_node(node* node, md_t debug_mode);
-
-
 err_t tree_ctor(tree* tree, md_t debug_mode)
 {
     if (tree == NULL)
@@ -50,6 +47,7 @@ void destroy_tree(tree* tree)
     destroy_node(tree->root, debug_mode);
 
     tree->root = NULL;
+    free(tree->text_buf);
 
     printf_log_msg(debug_mode, "destroy_tree: finished cutting down tree\n");
 }
@@ -70,12 +68,12 @@ void destroy_node(node* node, md_t debug_mode)
         destroy_node(node->no_branch, debug_mode);
     }
 
-    free(node->string);
-
     if (node->freshly_created)
     {
-        free(node);
+        free(node->string);
     }
+
+    free(node);
 }
 
 

@@ -38,7 +38,8 @@ int main()
     node node_5 = {str_6, NULL, NULL, false};
     node root_node = {str_7, &node_5, &node_20, false};
 
-    tree ref_tree = {&root_node, 7, debug_mode, ok};
+    // tree ref_tree = {&root_node, 7, debug_mode, ok};
+    tree ref_tree = {NULL, 0, debug_mode, ok};
 
     print_tree_dump(&ref_tree, "Beginning tree view\n");
 
@@ -55,9 +56,10 @@ int main()
                 executed = process_guessing(&ref_tree);
                 break;
             case load:
+                executed = load_database(&ref_tree);
                 break;
             case save:
-                save_database(&ref_tree);
+                executed = save_database(&ref_tree);
                 break;
             case quit:
                 end = true;
